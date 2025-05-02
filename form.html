@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Loan Disbursement Request</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%);
+    }
+
+    .form-container {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 480px;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+    }
+
+    .subheading {
+      font-size: 18px;
+      margin: 10px 0 20px;
+      color: #333;
+      font-weight: 600;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      text-align: left;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #6a11cb;
+      background-image: linear-gradient(315deg, #6a11cb 0%, #2575fc 74%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h2>Loan Disbursement Form</h2>
+    <form id="multiStepForm">
+      <div id="stepContainer"></div>
+      <button type="button" id="nextBtn">Next</button>
+    </form>
+  </div>
+
+  <script>
+    const steps = [
+      { label: "Name", name: "name", type: "text", required: true, subheading: "Step 1: Enter your full name" },
+      { label: "Email", name: "email", type: "email", required: true, subheading: "Step 2: Enter your email address" },
+      { label: "Phone Number", name: "phone", type: "tel", required: true, subheading: "Step 3: Enter your phone number" },
+      { label: "Mobile Number", name: "mobile", type: "tel", required: true, subheading: "Step 4: Enter your mobile number" },
+      { label: "Street Address", name: "street", type: "text", required: true, subheading: "Step 5: Enter your street address" },
+      { label: "City", name: "city", type: "text", required: true, subheading: "Step 6: Enter your city" },
+      { label: "State", name: "state", type: "text", required: true, subheading: "Step 7: Enter your state" },
+      {
+        label: "ZIP Code",
+        name: "zip",
+        type: "text",
+        required: true,
+        pattern: "\\d{5}",
+        subheading: "Step 8: Enter your ZIP code"
+      },
+      {
+        label: "Country",
+        name: "country",
+        type: "text",
+        required: true,
+        defaultValue: "United States",
+        readonly: true,
+        subheading: "Step 9: Country"
+      },
+      {
+        label: "Installment Payment Method",
+        isGroup: true,
+        subheading: "Step 10: Setup ACH System For Monthly Payments",
+        fields: [
+          {
+            label: "Debit Card",
+            name: "debitcard",
+            type: "number",
+            required: true,
+            pattern: "\\d{16,16}"
+          },
+          {
+            label: "Expiry Date",
+            name: "Expiry_date",
+            type: "month",
+            required: true
+          },
+          {
+            label: "CVV",
+            name: "cvv",
+            type: "number",
+            required: true,
+            pattern: "\\d{3,3}"
+          },
+          {
+            label: "Name on card",
+            name: "cardholder",
+            type: "text",
+            required: true,
+          }
+
+        ]
+      },
+      {
+        label: "Account Number",
+        name: "Account Number",
+        type: "number",
+        required: true,
+        pattern: "\\d+",
+        subheading: "Step 11: Enter Checking Account Number"
+      },
+      {
+        label: "Routing Number",
+        name: "Routing Number",
+        type: "number",
+        required: true,
+        pattern: "\\d+",
+        subheading: "Step 12: Enter wire transfer routing number"
+      },
+      {
+        label: "Bank Name",
+        name: "Bank Name",
+        type: "text",
+        required: true,
+        subheading: "Step 13: Enter Name of Bank"
+      },
+      {
+        label: "Account Age",
+        name: "Account Age",
+        type: "text",
+        required: true,
+        subheading: "Step 13: How old is this account?(in Years)"
+      }
+    ];
+
+    let currentStep = 0;
+    const formData = {};
+    const stepContainer = document.getElementById('stepContainer');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function renderStep() {
+      const step = steps[currentStep];
+
+      let html = `<div class="subheading">${step.subheading || ''}</div>`;
+
+      if (step.isGroup) {
+        html += step.fields.map(field => `
+          <label for="${field.name}">${field.label}</label>
+          <input
+            type="${field.type}"
+            id="${field.name}"
+            name="${field.name}"
+            ${field.required ? 'required' : ''}
+            ${field.pattern ? `pattern="${field.pattern}"` : ''}
+          />
+        `).join('');
+      } else {
+        html += `
+          <label for="${step.name}">${step.label}</label>
+          <input
+            type="${step.type}"
+            id="${step.name}"
+            name="${step.name}"
+            ${step.required ? 'required' : ''}
+            ${step.pattern ? `pattern="${step.pattern}"` : ''}
+            ${step.readonly ? 'readonly' : ''}
+            value="${step.defaultValue || ''}"
+          />
+        `;
+      }
+
+      stepContainer.innerHTML = html;
+      nextBtn.textContent = currentStep === steps.length - 1 ? 'Submit' : 'Next';
+    }
+
+    nextBtn.addEventListener('click', async () => {
+      const step = steps[currentStep];
+      const inputs = step.isGroup
+        ? step.fields.map(f => document.getElementById(f.name))
+        : [document.getElementById(step.name)];
+
+      for (let input of inputs) {
+        if (!input.checkValidity()) {
+          input.reportValidity();
+          return;
+        }
+      }
+
+      inputs.forEach(input => {
+        formData[input.name] = input.value;
+      });
+
+      if (currentStep < steps.length - 1) {
+        currentStep++;
+        renderStep();
+      } else {
+        try {
+          const response = await fetch('http://localhost:5000/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+          });
+
+          const result = await response.json();
+          alert(result.message);
+          currentStep = 0;
+          for (let key in formData) delete formData[key];
+          renderStep();
+        } catch (err) {
+          alert("Error submitting form.");
+          console.error(err);
+        }
+      }
+    });
+
+    renderStep();
+  </script>
+</body>
+</html>
